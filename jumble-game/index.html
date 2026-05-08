@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jumble Word Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <div class="stat">
+        <span class="stat-label">Level</span>
+        <div id="level-badge"></div>
+      </div>
+      <div class="stat center">
+        <span class="stat-label">Score</span>
+        <div class="stat-value" id="score">0</div>
+      </div>
+      <div class="stat right">
+        <span class="stat-label">Hints left</span>
+        <div class="stat-value" id="hints-left">5</div>
+      </div>
+    </div>
+
+    <div class="streak-section">
+      <div class="streak-label">Streak — 10 correct to advance</div>
+      <div id="streak-pips" class="streak-pips"></div>
+    </div>
+
+    <div class="card" id="category-card">
+      <div class="card-label">Category</div>
+      <div class="card-value" id="category">—</div>
+      <div id="hint-area"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Your answer</div>
+      <div id="answer-slots" class="tile-row"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Scrambled letters</div>
+      <div id="letter-tiles" class="tile-row"></div>
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+    <div id="level-banner"></div>
+
+    <div class="actions">
+      <button id="btn-clear">Clear</button>
+      <button id="btn-hint">Use hint</button>
+      <button id="btn-check" class="primary">Check</button>
+    </div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
