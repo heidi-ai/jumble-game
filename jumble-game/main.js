@@ -137,6 +137,21 @@ function updateHintButtons() {
   $('btn-buy-hint').disabled = state.score < HINT_COST || state.checked;
 }
 
+function shuffleTiles() {
+  if (state.checked) return;
+  const oldScrambled = [...state.scrambled];
+  const arr = [...state.scrambled];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  state.scrambled = arr;
+  state.answer = state.answer.map(oldIdx =>
+    oldIdx === null ? null : state.scrambled.indexOf(oldScrambled[oldIdx])
+  );
+  renderTiles();
+}
+
 function placeLetter(tileIdx) {
   if (state.checked) return;
   const slot = state.answer.indexOf(null);
@@ -313,6 +328,7 @@ $('btn-check').onclick = checkAnswer;
 $('btn-clear').onclick = clearAnswer;
 $('btn-hint').onclick = useHint;
 $('btn-buy-hint').onclick = buyHint;
+$('btn-shuffle').onclick = shuffleTiles;
 
 renderLevelBadge();
 renderLeaderboard();
