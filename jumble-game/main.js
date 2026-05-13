@@ -16,6 +16,7 @@ const state = {
   scrambled: [],
   answer: [],
   checked: false,
+  hintUsed: false,
   currentWord: null,
 };
 
@@ -83,6 +84,7 @@ function loadWord() {
   state.scrambled = scramble(state.currentWord.word).map((l, i) => ({ l, id: i, used: false }));
   state.answer = Array(state.currentWord.word.length).fill(null);
   state.checked = false;
+  state.hintUsed = false;
   $('category').textContent = state.currentWord.category;
   $('hint-area').innerHTML = '';
   setFeedback('', '');
@@ -133,7 +135,7 @@ function renderTiles() {
 }
 
 function updateHintButtons() {
-  $('btn-hint').disabled = state.hints <= 0 || state.checked;
+  $('btn-hint').disabled = state.hints <= 0 || state.checked || state.hintUsed;
   $('btn-buy-hint').disabled = state.score < HINT_COST || state.checked;
 }
 
@@ -178,8 +180,9 @@ function clearAnswer() {
 }
 
 function useHint() {
-  if (state.hints <= 0 || state.checked) return;
+  if (state.hints <= 0 || state.checked || state.hintUsed) return;
   state.hints--;
+  state.hintUsed = true;
   $('hints-left').textContent = state.hints;
   $('hint-area').innerHTML = `<span class="hint-chip">${state.currentWord.hint}</span>`;
   updateHintButtons();
