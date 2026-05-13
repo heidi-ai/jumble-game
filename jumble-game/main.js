@@ -136,7 +136,7 @@ function renderTiles() {
 
 function updateHintButtons() {
   $('btn-hint').disabled = state.hints <= 0 || state.checked || state.hintUsed;
-  $('btn-buy-hint').disabled = state.score < HINT_COST || state.checked;
+  $('btn-buy-hint').disabled = state.hints > 0 || state.score < HINT_COST || state.checked || state.hintUsed;
 }
 
 function shuffleTiles() {
@@ -189,12 +189,12 @@ function useHint() {
 }
 
 function buyHint() {
-  if (state.score < HINT_COST || state.checked) return;
+  if (state.hints > 0 || state.score < HINT_COST || state.checked || state.hintUsed) return;
   state.score -= HINT_COST;
-  state.hints++;
+  state.hintUsed = true;
   $('score').textContent = state.score;
-  $('hints-left').textContent = state.hints;
-  setFeedback(`Hint purchased! −${HINT_COST} pts`, 'warning');
+  $('hint-area').innerHTML = `<span class="hint-chip">${state.currentWord.hint}</span>`;
+  setFeedback(`Hint applied! −${HINT_COST} pts`, 'warning');
   updateHintButtons();
 }
 
