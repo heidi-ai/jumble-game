@@ -33,7 +33,7 @@ const sbHeaders = {
 async function fetchHighScores() {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/scores?select=initials,score,date&order=score.desc&limit=3`,
+      `${SUPABASE_URL}/rest/v1/scores?select=initials,score,date&order=score.desc&limit=10`,
       { headers: sbHeaders }
     );
     if (!res.ok) throw new Error(res.status);
