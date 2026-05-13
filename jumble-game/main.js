@@ -13,7 +13,6 @@ const state = {
   levelKey: 'easy',
   streak: 0,
   score: 0,
-  usedIndexes: [],
   hints: HINTS_START,
   scrambled: [],
   answer: [],
@@ -21,6 +20,16 @@ const state = {
   hintUsed: false,
   currentWord: null,
 };
+
+const USED_KEY = 'jumble-used';
+function getUsed(levelKey) {
+  try { return JSON.parse(localStorage.getItem(`${USED_KEY}-${levelKey}`)) || []; }
+  catch { return []; }
+}
+function setUsed(levelKey, arr) {
+  try { localStorage.setItem(`${USED_KEY}-${levelKey}`, JSON.stringify(arr)); }
+  catch {}
+}
 
 // ── High scores ──────────────────────────────────────────────────────────────
 
@@ -90,10 +99,11 @@ function scramble(word) {
 
 function pickWord() {
   const words = getLevelData().words;
-  let available = words.map((_, i) => i).filter(i => !state.usedIndexes.includes(i));
-  if (!available.length) { state.usedIndexes = []; available = words.map((_, i) => i); }
+  let used = getUsed(state.levelKey);
+  let available = words.map((_, i) => i).filter(i => !used.includes(i));
+  if (!available.length) { used = []; available = words.map((_, i) => i); }
   const idx = available[Math.floor(Math.random() * available.length)];
-  state.usedIndexes.push(idx);
+  setUsed(state.levelKey, [...used, idx]);
   return words[idx];
 }
 
@@ -267,7 +277,6 @@ function checkAnswer() {
 function advanceLevel(nextIdx) {
   state.levelKey = LEVEL_ORDER[nextIdx];
   state.streak = 0;
-  state.usedIndexes = [];
   renderLevelBadge();
   showBanner(`Level up! Welcome to ${getLevelData().label}`, false);
   setTimeout(loadWord, 2000);
@@ -338,7 +347,7 @@ function showBanner(msg) {
 }
 
 function restartGame() {
-  Object.assign(state, { levelKey: 'easy', streak: 0, score: 0, usedIndexes: [], hints: HINTS_START, checked: false });
+  Object.assign(state, { levelKey: 'easy', streak: 0, score: 0, hints: HINTS_START, checked: false });
   $('score').textContent = '0';
   $('hints-left').textContent = HINTS_START;
   renderLevelBadge();
