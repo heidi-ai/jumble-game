@@ -45,7 +45,7 @@ async function fetchHighScores() {
 
 async function insertHighScore(initials, score) {
   const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
     method: 'POST',
     headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
     body: JSON.stringify({
@@ -54,6 +54,7 @@ async function insertHighScore(initials, score) {
       date,
     }),
   });
+  if (!res.ok) throw new Error(`Save failed (${res.status})`);
 }
 
 async function renderLeaderboard() {
@@ -286,6 +287,7 @@ function showInitialsPrompt(finalScore, hintBonus) {
         <input id="initials-input" class="initials-input" maxlength="3" placeholder="AAA" autocomplete="off" spellcheck="false" />
         <button class="primary" id="btn-save-score">Save score</button>
       </div>
+      <div id="save-error" style="font-size:13px;color:var(--red);margin-top:8px;"></div>
     </div>`;
 
   const input = $('initials-input');
@@ -305,9 +307,16 @@ function showInitialsPrompt(finalScore, hintBonus) {
     if (!initials) return;
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving…';
-    await insertHighScore(initials, finalScore);
-    await renderLeaderboard();
-    showFinalBanner(hintBonus, finalScore);
+    try {
+      await insertHighScore(initials, finalScore);
+      await renderLeaderboard();
+      showFinalBanner(hintBonus, finalScore);
+    } catch {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save score';
+      const errEl = $('save-error');
+      if (errEl) errEl.textContent = 'Save failed — please try again.';
+    }
   }
 }
 
