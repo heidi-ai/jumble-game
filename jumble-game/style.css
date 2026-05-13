@@ -181,6 +181,7 @@ body {
 }
 
 .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.actions-secondary { display: flex; gap: 8px; margin-top: -4px; }
 
 button {
   padding: 8px 20px;
