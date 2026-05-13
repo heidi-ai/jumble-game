@@ -233,10 +233,8 @@ function checkAnswer() {
       setTimeout(loadWord, 1100);
     }
   } else {
-    state.streak = 0;
-    renderStreakPips();
     Array.from(slots).forEach(s => s.className = 'tile wrong');
-    setFeedback('Not quite — streak reset!', 'danger');
+    setFeedback('Not quite — try again!', 'danger');
     setTimeout(() => {
       state.checked = false;
       state.answer = Array(state.currentWord.word.length).fill(null);
