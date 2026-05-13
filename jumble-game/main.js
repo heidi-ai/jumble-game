@@ -5,7 +5,9 @@ const $ = id => document.getElementById(id);
 const HINTS_START = 5;
 const HINT_COST = 5;
 const HINT_BONUS = 100;
-const STORAGE_KEY = 'jumble-highscores';
+
+const SUPABASE_URL = 'https://ueaovkskozkglwlvrbwx.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_VEkT1kNKr2Ajuh7BOmZJ6w_1L8YWGaL';
 
 const state = {
   levelKey: 'easy',
@@ -22,27 +24,42 @@ const state = {
 
 // ── High scores ──────────────────────────────────────────────────────────────
 
-function loadHighScores() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch { return []; }
+const sbHeaders = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json',
+};
+
+async function fetchHighScores() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/scores?select=initials,score,date&order=score.desc&limit=3`,
+      { headers: sbHeaders }
+    );
+    if (!res.ok) throw new Error(res.status);
+    return await res.json();
+  } catch {
+    return [];
+  }
 }
 
-function saveHighScore(initials, score) {
-  const scores = loadHighScores();
-  scores.push({
-    initials: initials.toUpperCase().padEnd(3, ' ').slice(0, 3),
-    score,
-    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+async function insertHighScore(initials, score) {
+  const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
+    method: 'POST',
+    headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      initials: initials.toUpperCase().padEnd(3, ' ').slice(0, 3),
+      score,
+      date,
+    }),
   });
-  scores.sort((a, b) => b.score - a.score);
-  const top3 = scores.slice(0, 3);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(top3));
-  return top3;
 }
 
-function renderLeaderboard() {
-  const scores = loadHighScores();
+async function renderLeaderboard() {
   const el = $('leaderboard-list');
+  el.innerHTML = '<div class="lb-empty">Loading…</div>';
+  const scores = await fetchHighScores();
   if (!scores.length) {
     el.innerHTML = '<div class="lb-empty">No scores yet — finish all three levels!</div>';
     return;
@@ -283,11 +300,13 @@ function showInitialsPrompt(finalScore, hintBonus) {
   saveBtn.disabled = true;
   saveBtn.onclick = submit;
 
-  function submit() {
+  async function submit() {
     const initials = input.value.trim();
     if (!initials) return;
-    saveHighScore(initials, finalScore);
-    renderLeaderboard();
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    await insertHighScore(initials, finalScore);
+    await renderLeaderboard();
     showFinalBanner(hintBonus, finalScore);
   }
 }
