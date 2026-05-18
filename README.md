@@ -1,1 +1,1 @@
-Hosted on Gitpages here: heidi-ai.github.io
+Hosted on Gitpages @ https://heidi-ai.github.io/jumble-game/
