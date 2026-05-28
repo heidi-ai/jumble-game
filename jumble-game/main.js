@@ -24,6 +24,8 @@ const state = {
   currentWord: null,
   timerSeconds: LEVEL_TIME,
   timerInterval: null,
+  paused: false,
+  pendingTimerReset: false,
 };
 
 const USED_KEY = 'jumble-used';
@@ -118,16 +120,24 @@ function loadWord(resetTimer = false) {
   state.answer = Array(state.currentWord.word.length).fill(null);
   state.checked = false;
   state.hintUsed = false;
+  state.paused = false;
   $('category').textContent = state.currentWord.category;
   $('hint-area').innerHTML = '';
   setFeedback('', '');
   $('level-banner').innerHTML = '';
   $('btn-check').disabled = false;
-  if (resetTimer) startTimer();
+  $('btn-pause').disabled = false;
+  $('btn-pause').textContent = '⏸ Pause';
   renderStreakPips();
   renderLives();
   renderTiles();
   updateHintButtons();
+  if (resetTimer) {
+    state.pendingTimerReset = true;
+    showOverlay('Ready?');
+  } else {
+    hideOverlay();
+  }
 }
 
 function renderLevelBadge() {
@@ -165,6 +175,55 @@ function stopTimer() {
   if (state.timerInterval) {
     clearInterval(state.timerInterval);
     state.timerInterval = null;
+  }
+}
+
+function showOverlay(message) {
+  $('overlay-message').textContent = message;
+  $('btn-start').textContent = '▶ Start';
+  $('game-overlay').classList.add('visible');
+  $('btn-pause').disabled = true;
+}
+
+function hideOverlay() {
+  $('game-overlay').classList.remove('visible');
+  $('btn-pause').disabled = false;
+}
+
+function startGame() {
+  hideOverlay();
+  if (state.pendingTimerReset) {
+    state.pendingTimerReset = false;
+    startTimer();
+  } else {
+    // resuming from pause — just restart the interval
+    state.timerInterval = setInterval(() => {
+      state.timerSeconds--;
+      renderTimer();
+      if (state.timerSeconds <= 0) {
+        stopTimer();
+        setFeedback("Time's up — game over!", 'danger');
+        $('btn-check').disabled = true;
+        $('btn-hint').disabled = true;
+        $('btn-buy-hint').disabled = true;
+        setTimeout(() => showTimerGameOver(), 1000);
+      }
+    }, 1000);
+  }
+  state.paused = false;
+  $('btn-pause').textContent = '⏸ Pause';
+}
+
+function togglePause() {
+  if (state.paused) {
+    startGame();
+  } else {
+    stopTimer();
+    state.paused = true;
+    $('btn-pause').textContent = '▶ Resume';
+    $('overlay-message').textContent = 'Game paused';
+    $('btn-start').textContent = '▶ Resume';
+    $('game-overlay').classList.add('visible');
   }
 }
 
@@ -323,6 +382,7 @@ function buyHint() {
 }
 
 function checkAnswer() {
+  if (state.paused) return;
   if (state.answer.includes(null)) { setFeedback('Fill all the letters first!', 'warning'); return; }
   const guess = state.answer.map(i => state.scrambled[i].l).join('');
   state.checked = true;
@@ -505,7 +565,7 @@ function showBanner(msg) {
 }
 
 function restartGame() {
-  Object.assign(state, { levelKey: 'easy', streak: 0, score: 0, hints: HINTS_START, lives: LIVES_START, checked: false });
+  Object.assign(state, { levelKey: 'easy', streak: 0, score: 0, hints: HINTS_START, lives: LIVES_START, checked: false, paused: false, pendingTimerReset: false });
   $('score').textContent = '0';
   $('hints-left').textContent = HINTS_START;
   renderLevelBadge();
@@ -525,6 +585,8 @@ $('btn-clear').onclick = clearAnswer;
 $('btn-hint').onclick = useHint;
 $('btn-buy-hint').onclick = buyHint;
 $('btn-shuffle').onclick = shuffleTiles;
+$('btn-start').onclick = startGame;
+$('btn-pause').onclick = togglePause;
 
 renderLevelBadge();
 renderLeaderboard();

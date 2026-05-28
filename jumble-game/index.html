@@ -36,22 +36,29 @@
       <div id="streak-pips" class="streak-pips"></div>
     </div>
 
-    <div class="card" id="category-card">
-      <div class="card-label">Category</div>
-      <div class="card-value" id="category">—</div>
-      <div id="hint-area"></div>
-    </div>
+    <div id="game-content">
+      <div class="card" id="category-card">
+        <div class="card-label">Category</div>
+        <div class="card-value" id="category">—</div>
+        <div id="hint-area"></div>
+      </div>
 
-    <div class="section">
-      <div class="section-label">Your answer</div>
-      <div id="answer-slots" class="tile-row"></div>
-    </div>
+      <div class="section">
+        <div class="section-label">Your answer</div>
+        <div id="answer-slots" class="tile-row"></div>
+      </div>
 
-    <div class="section">
-      <div class="section-label">Scrambled letters</div>
-      <div class="tile-row-wrap">
-        <div id="letter-tiles" class="tile-row"></div>
-        <button id="btn-shuffle" class="btn-shuffle">↺</button>
+      <div class="section">
+        <div class="section-label">Scrambled letters</div>
+        <div class="tile-row-wrap">
+          <div id="letter-tiles" class="tile-row"></div>
+          <button id="btn-shuffle" class="btn-shuffle">↺</button>
+        </div>
+      </div>
+
+      <div id="game-overlay" class="game-overlay">
+        <div id="overlay-message" class="overlay-message"></div>
+        <button id="btn-start" class="primary overlay-btn">▶ Start</button>
       </div>
     </div>
 
@@ -60,6 +67,7 @@
 
     <div class="actions">
       <button id="btn-clear">Clear</button>
+      <button id="btn-pause">⏸ Pause</button>
       <button id="btn-hint">Use hint</button>
       <button id="btn-check" class="primary">Check</button>
     </div>
