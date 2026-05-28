@@ -8,7 +8,7 @@
   --text-hint: #999;
   --border: rgba(0,0,0,0.12);
   --border-med: rgba(0,0,0,0.22);
-  --radius-md: 8px;
+  --radius-md: 10px;
   --radius-lg: 12px;
   --green: #3B6D11;
   --green-bg: #EAF3DE;
@@ -76,6 +76,14 @@ body {
 .stat.right { align-items: flex-end; }
 .stat-label { font-size: 13px; color: var(--text-secondary); }
 .stat-value { font-size: 22px; font-weight: 500; }
+.stat-chip {
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 18px;
+  font-weight: 500;
+}
 
 .level-badge {
   display: inline-block;
@@ -106,6 +114,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 .card-label { font-size: 13px; color: var(--text-secondary); }
 .card-value { font-size: 15px; font-weight: 500; }
@@ -144,9 +153,10 @@ body {
   color: var(--text);
   cursor: pointer;
   user-select: none;
-  transition: background 0.12s, border-color 0.12s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: background 0.12s, border-color 0.12s, transform 0.1s;
 }
-.tile:hover { background: var(--bg-secondary); }
+.tile:hover { background: var(--bg-secondary); transform: translateY(-1px); }
 .tile.correct { background: var(--green-bg);  border-color: var(--green-border);  color: var(--green); }
 .tile.wrong   { background: var(--red-bg);    border-color: var(--red-border);    color: var(--red); }
 
@@ -223,14 +233,16 @@ body {
 button {
   padding: 8px 20px;
   border-radius: var(--radius-md);
-  border: 0.5px solid var(--border-med);
+  border: 1.5px solid var(--border-med);
   background: transparent;
   color: var(--text);
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.12s;
+  transition: transform 0.1s, background 0.12s;
 }
 button:hover { background: var(--bg-secondary); }
+button:active { transform: scale(0.95); }
 button.primary {
   background: var(--blue-bg);
   color: var(--blue);
@@ -288,3 +300,13 @@ button:disabled { opacity: 0.4; cursor: default; }
   text-transform: uppercase;
 }
 .initials-input:focus { outline: none; border-color: var(--blue); }
+
+.logo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+.game-logo {
+  height: 90px;
+  width: auto;
+}
