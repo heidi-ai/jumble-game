@@ -5,6 +5,7 @@ const $ = id => document.getElementById(id);
 const HINTS_START = 5;
 const HINT_COST = 5;
 const HINT_BONUS = 100;
+const LEVEL_TIME = 5 * 60; // 5 minutes in seconds
 
 const SUPABASE_URL = 'https://ueaovkskozkglwlvrbwx.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_VEkT1kNKr2Ajuh7BOmZJ6w_1L8YWGaL';
@@ -19,6 +20,8 @@ const state = {
   checked: false,
   hintUsed: false,
   currentWord: null,
+  timerSeconds: LEVEL_TIME,
+  timerInterval: null,
 };
 
 const USED_KEY = 'jumble-used';
@@ -107,7 +110,7 @@ function pickWord() {
   return words[idx];
 }
 
-function loadWord() {
+function loadWord(resetTimer = false) {
   state.currentWord = pickWord();
   state.scrambled = scramble(state.currentWord.word).map((l, i) => ({ l, id: i, used: false }));
   state.answer = Array(state.currentWord.word.length).fill(null);
@@ -118,6 +121,7 @@ function loadWord() {
   setFeedback('', '');
   $('level-banner').innerHTML = '';
   $('btn-check').disabled = false;
+  if (resetTimer) startTimer();
   renderStreakPips();
   renderTiles();
   updateHintButtons();
@@ -126,6 +130,88 @@ function loadWord() {
 function renderLevelBadge() {
   const lvl = getLevelData();
   $('level-badge').innerHTML = `<span class="level-badge ${lvl.badgeClass}">${lvl.label}</span>`;
+}
+
+function renderTimer() {
+  const m = Math.floor(state.timerSeconds / 60);
+  const s = state.timerSeconds % 60;
+  const el = $('timer-display');
+  el.textContent = `${m}:${String(s).padStart(2, '0')}`;
+  el.style.color = state.timerSeconds <= 60 ? 'var(--red)' : '';
+}
+
+function startTimer() {
+  stopTimer();
+  state.timerSeconds = LEVEL_TIME;
+  renderTimer();
+  state.timerInterval = setInterval(() => {
+    state.timerSeconds--;
+    renderTimer();
+    if (state.timerSeconds <= 0) {
+      stopTimer();
+      setFeedback("Time's up — game over!", 'danger');
+      $('btn-check').disabled = true;
+      $('btn-hint').disabled = true;
+      $('btn-buy-hint').disabled = true;
+      setTimeout(() => showTimerGameOver(), 1000);
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (state.timerInterval) {
+    clearInterval(state.timerInterval);
+    state.timerInterval = null;
+  }
+}
+
+function showTimerGameOver() {
+  $('level-banner').innerHTML = `
+    <div class="level-up-banner">
+      ⏱️ Time's Up!<br><br>
+      You ran out of time.<br><br>
+      Final score: <strong>${state.score.toLocaleString()}</strong><br><br>
+      <div class="initials-form">
+        <input id="initials-input" class="initials-input" maxlength="3" placeholder="AAA" autocomplete="off" spellcheck="false" />
+        <button class="primary" id="btn-save-score">Save score</button>
+      </div>
+      <div id="save-error" style="font-size:13px;color:var(--red);margin-top:8px;"></div>
+    </div>`;
+
+  const input = $('initials-input');
+  const saveBtn = $('btn-save-score');
+  input.focus();
+
+  input.addEventListener('input', () => {
+    input.value = input.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    saveBtn.disabled = input.value.trim().length === 0;
+  });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  saveBtn.disabled = true;
+  saveBtn.onclick = submit;
+
+  async function submit() {
+    const initials = input.value.trim();
+    if (!initials) return;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    try {
+      await insertHighScore(initials, state.score);
+      await renderLeaderboard();
+      $('level-banner').innerHTML = `
+        <div class="level-up-banner">
+          ⏱️ Time's Up!<br><br>
+          Final score: <strong>${state.score.toLocaleString()}</strong>
+          <br><br><button class="primary" id="btn-restart">Play again</button>
+        </div>`;
+      $('btn-restart').onclick = restartGame;
+    } catch {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save score';
+      const errEl = $('save-error');
+      if (errEl) errEl.textContent = 'Save failed — please try again.';
+    }
+  }
 }
 
 function renderStreakPips() {
@@ -247,6 +333,7 @@ function checkAnswer() {
         const hintBonus = state.hints * HINT_BONUS;
         state.score += hintBonus;
         $('score').textContent = state.score;
+        stopTimer();
         $('btn-check').disabled = true;
         $('btn-hint').disabled = true;
         $('btn-buy-hint').disabled = true;
@@ -258,7 +345,7 @@ function checkAnswer() {
       }
     } else {
       setFeedback(`Correct! +${pts} pts`, 'success');
-      setTimeout(loadWord, 1100);
+      setTimeout(() => loadWord(false), 1100);
     }
   } else {
     Array.from(slots).forEach(s => s.className = 'tile wrong');
@@ -279,7 +366,7 @@ function advanceLevel(nextIdx) {
   state.streak = 0;
   renderLevelBadge();
   showBanner(`Level up! Welcome to ${getLevelData().label}`, false);
-  setTimeout(loadWord, 2000);
+  setTimeout(() => loadWord(true), 2000);
 }
 
 // ── End-game flow ─────────────────────────────────────────────────────────────
@@ -351,7 +438,7 @@ function restartGame() {
   $('score').textContent = '0';
   $('hints-left').textContent = HINTS_START;
   renderLevelBadge();
-  loadWord();
+  loadWord(true);
 }
 
 function setFeedback(msg, type) {
@@ -370,4 +457,4 @@ $('btn-shuffle').onclick = shuffleTiles;
 
 renderLevelBadge();
 renderLeaderboard();
-loadWord();
+loadWord(true);
