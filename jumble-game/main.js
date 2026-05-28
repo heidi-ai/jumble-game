@@ -6,7 +6,7 @@ const HINTS_START = 5;
 const LIVES_START = 3;
 const HINT_COST = 5;
 const HINT_BONUS = 100;
-const LEVEL_TIME = 5 * 60; // 5 minutes in seconds
+const LEVEL_TIME = 3 * 60; // 3 minutes in seconds
 
 const SUPABASE_URL = 'https://ueaovkskozkglwlvrbwx.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_VEkT1kNKr2Ajuh7BOmZJ6w_1L8YWGaL';
@@ -363,6 +363,7 @@ function checkAnswer() {
     Array.from(slots).forEach(s => s.className = 'tile wrong');
 
     if (state.lives <= 0) {
+      stopTimer();
       setFeedback('No lives left — game over!', 'danger');
       $('btn-check').disabled = true;
       $('btn-hint').disabled = true;
