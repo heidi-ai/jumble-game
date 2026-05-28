@@ -3,6 +3,7 @@ import { LEVELS, LEVEL_ORDER } from './jumble-words.js';
 const $ = id => document.getElementById(id);
 
 const HINTS_START = 5;
+const LIVES_START = 3;
 const HINT_COST = 5;
 const HINT_BONUS = 100;
 
@@ -14,6 +15,7 @@ const state = {
   streak: 0,
   score: 0,
   hints: HINTS_START,
+  lives: LIVES_START,
   scrambled: [],
   answer: [],
   checked: false,
@@ -119,6 +121,7 @@ function loadWord() {
   $('level-banner').innerHTML = '';
   $('btn-check').disabled = false;
   renderStreakPips();
+  renderLives();
   renderTiles();
   updateHintButtons();
 }
@@ -126,6 +129,13 @@ function loadWord() {
 function renderLevelBadge() {
   const lvl = getLevelData();
   $('level-badge').innerHTML = `<span class="level-badge ${lvl.badgeClass}">${lvl.label}</span>`;
+}
+
+function renderLives() {
+  const hearts = Array.from({ length: LIVES_START }, (_, i) =>
+    i < state.lives ? '❤️' : '🖤'
+  ).join('');
+  $('lives-display').textContent = hearts;
 }
 
 function renderStreakPips() {
@@ -261,16 +271,76 @@ function checkAnswer() {
       setTimeout(loadWord, 1100);
     }
   } else {
+    state.lives--;
+    renderLives();
     Array.from(slots).forEach(s => s.className = 'tile wrong');
-    setFeedback('Not quite — try again!', 'danger');
-    setTimeout(() => {
-      state.checked = false;
-      state.answer = Array(state.currentWord.word.length).fill(null);
-      state.scrambled.forEach(t => t.used = false);
-      renderTiles();
-      setFeedback('', '');
-      updateHintButtons();
-    }, 1000);
+
+    if (state.lives <= 0) {
+      setFeedback('No lives left — game over!', 'danger');
+      $('btn-check').disabled = true;
+      $('btn-hint').disabled = true;
+      $('btn-buy-hint').disabled = true;
+      setTimeout(() => showGameOver(), 1000);
+    } else {
+      setFeedback(`Wrong! ${state.lives} ${state.lives === 1 ? 'life' : 'lives'} remaining`, 'danger');
+      setTimeout(() => {
+        state.checked = false;
+        state.answer = Array(state.currentWord.word.length).fill(null);
+        state.scrambled.forEach(t => t.used = false);
+        renderTiles();
+        setFeedback('', '');
+        updateHintButtons();
+      }, 1000);
+    }
+  }
+}
+
+function showGameOver() {
+  $('level-banner').innerHTML = `
+    <div class="level-up-banner">
+      💀 Game Over!<br><br>
+      You ran out of lives.<br><br>
+      Final score: <strong>${state.score.toLocaleString()}</strong><br><br>
+      <div class="initials-form">
+        <input id="initials-input" class="initials-input" maxlength="3" placeholder="AAA" autocomplete="off" spellcheck="false" />
+        <button class="primary" id="btn-save-score">Save score</button>
+      </div>
+      <div id="save-error" style="font-size:13px;color:var(--red);margin-top:8px;"></div>
+    </div>`;
+
+  const input = $('initials-input');
+  const saveBtn = $('btn-save-score');
+  input.focus();
+
+  input.addEventListener('input', () => {
+    input.value = input.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    saveBtn.disabled = input.value.trim().length === 0;
+  });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  saveBtn.disabled = true;
+  saveBtn.onclick = submit;
+
+  async function submit() {
+    const initials = input.value.trim();
+    if (!initials) return;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    try {
+      await insertHighScore(initials, state.score);
+      await renderLeaderboard();
+      $('level-banner').innerHTML = `
+        <div class="level-up-banner">
+          💀 Game Over!<br><br>
+          Final score: <strong>${state.score.toLocaleString()}</strong>
+          <br><br><button class="primary" id="btn-restart">Play again</button>
+        </div>`;
+      $('btn-restart').onclick = restartGame;
+    } catch {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save score';
+      const errEl = $('save-error');
+      if (errEl) errEl.textContent = 'Save failed — please try again.';
+    }
   }
 }
 
@@ -347,7 +417,7 @@ function showBanner(msg) {
 }
 
 function restartGame() {
-  Object.assign(state, { levelKey: 'easy', streak: 0, score: 0, hints: HINTS_START, checked: false });
+  Object.assign(state, { levelKey: 'easy', streak: 0, score: 0, hints: HINTS_START, lives: LIVES_START, checked: false });
   $('score').textContent = '0';
   $('hints-left').textContent = HINTS_START;
   renderLevelBadge();
