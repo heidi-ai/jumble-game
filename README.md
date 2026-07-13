@@ -1,6 +1,9 @@
 # Jumble Word Game
 
 A browser-based word unscrambling game with three difficulty levels, a streak system, and hints.
+Hosted on Gitpages at: https://github.com/heidi-ai/jumble-game
+Supradatabase is at: https://supabase.com/dashboard/project/ueaovkskozkglwlvrbwx
+
 
 ## How to play
 
