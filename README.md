@@ -37,8 +37,12 @@ jumble-game/
 │   ├── main.js           ← All game logic
 │   ├── style.css         ← All visual styling
 │   ├── logo.svg          ← Tile-style logo (JMBLE + floating U)
+│   ├── favicon.svg       ← J-tile browser tab icon
 │   ├── jumble-words.js   ← Word list and categories by level
-│   └── vite.config.js    ← Build configuration
+│   ├── vite.config.js    ← Build configuration
+│   └── .env.local        ← Local secrets (gitignored, never committed)
+├── .github/workflows/
+│   └── deploy.yml        ← Auto-deploys to GitHub Pages on every push to main
 ├── dist/                 ← Built output (auto-generated, don't edit)
 └── README.md             ← This file
 ```
@@ -122,51 +126,62 @@ INSERT INTO scores (initials, score, date) VALUES ('HD', 500, 'Jul 22, 2026');
 DELETE FROM scores WHERE id = 1;
 ```
 
-> **Note:** The previous database was Supabase (`ueaovkskozkglwlvrbwx.supabase.co`), which was retired because its free tier pauses after inactivity.
+### Auth token
+
+The database auth token is stored as a **GitHub Actions secret** (`TURSO_TOKEN`) and injected at build time — it is never stored in the source code. For local development, add it to `jumble-game/.env.local`.
+
+If the token needs to be rotated (e.g. for security reasons):
+1. Generate a new token in the Turso dashboard
+2. Update the `TURSO_TOKEN` secret in [GitHub repo settings](https://github.com/heidi-ai/jumble-game/settings/secrets/actions)
+3. Update `jumble-game/.env.local` on your local machine
+4. Push any change to `main` to trigger a fresh deployment with the new token
+
+> **Note:** The previous database was Supabase, which was retired because its free tier pauses after inactivity.
 
 ---
 
 ## Local Development
 
-To run the game on your computer:
+To run the game on your computer, first create a local secrets file:
+
+```
+jumble-game/.env.local
+```
+
+Add this line (get the token value from the GitHub repository secret or Turso dashboard):
+```
+VITE_TURSO_TOKEN=your-token-here
+```
+
+Then start the dev server:
 
 ```bash
 cd jumble-game
 npx vite --port 5173
 ```
 
-Then open [localhost:5173/jumble-game/](http://localhost:5173/jumble-game/) in your browser. Changes to the source files update live automatically.
+Open [localhost:5173/jumble-game/](http://localhost:5173/jumble-game/) in your browser. Changes to source files update live automatically.
+
+> **Note:** `.env.local` is gitignored and will never be committed — keep your token there, not in the source code.
 
 ---
 
 ## Deploying to GitHub Pages
 
-The live site is hosted on the `gh-pages` branch. To deploy after making changes:
+Deployment is **automatic** — just push to `main` and GitHub Actions handles the rest:
 
-**1. Build the project** (from inside the `jumble-game/` subfolder):
 ```bash
-cd jumble-game
-npx vite build
+git push origin main
 ```
 
-**2. Switch to gh-pages and copy the build:**
-```bash
-git checkout gh-pages
-cp dist/index.html .
-cp -r dist/assets .
-git show main:jumble-game/logo.svg > logo.svg
-```
+The workflow (`.github/workflows/deploy.yml`) will:
+1. Install dependencies
+2. Build the project (injecting the `TURSO_TOKEN` secret)
+3. Deploy the built files to the `gh-pages` branch
 
-**3. Commit and push:**
-```bash
-git add index.html assets/ logo.svg
-git commit -m "Deploy: description of changes"
-git pull origin gh-pages --rebase
-git push origin gh-pages
-git checkout main
-```
+The live site updates within a minute or two of pushing.
 
-> **Note:** The logo (`logo.svg`) is not automatically included in the Vite build because it's referenced in HTML rather than imported in code — it must be manually copied each deployment.
+> **Important:** The repository must remain **public** for GitHub Pages to work on the free plan. Making it private will take the site offline.
 
 ---
 
@@ -179,3 +194,6 @@ git checkout main
 | `start-and-pause` | Start overlay hides the first clue; Pause stops timer and hides clue |
 | `ui-enhancements` | Tile-inspired UI redesign + JMBLE logo |
 | `main` | Leaderboard migrated from Supabase → Turso |
+| `main` | Turso auth token moved to GitHub secret |
+| `main` | J-tile favicon added |
+| `main` | Auto-deploy via GitHub Actions added |
