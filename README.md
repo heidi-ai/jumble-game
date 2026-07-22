@@ -1,42 +1,181 @@
 # Jumble Word Game
 
-A browser-based word unscrambling game with three difficulty levels, a streak system, and hints.
-Hosted on Gitpages at: https://github.com/heidi-ai/jumble-game
-Supradatabase is at: https://supabase.com/dashboard/project/ueaovkskozkglwlvrbwx
+A browser-based word unscrambling game with three difficulty levels, a countdown timer, lives, hints, and a live global leaderboard.
 
+**Live game:** [heidi-ai.github.io/jumble-game](https://heidi-ai.github.io/jumble-game/)
 
-## How to play
+---
 
-1. A scrambled word and its **category** are shown.
-2. Click the scrambled letter tiles to build your answer in the slots above.
-3. Click a filled slot to send a letter back to the pool.
-4. Hit **Check** to submit. Correct answers earn points; wrong answers reset your streak.
-5. Use **Hint** to reveal a clue (limited per level).
-6. **Streak up 10 correct answers in a row** to advance to the next level.
+## How to Play
 
-## Levels
+1. Hit **▶ Start** to begin — this starts the 3-minute countdown timer
+2. Unscramble the letters to spell the hidden word
+3. Use the letter tiles to build your answer, then press **Check**
+4. Advance through Easy → Medium → Hard by getting **10 correct in a row** per level
+5. When the game ends, enter your initials to save your score to the leaderboard
 
-| Level | Points per word | Hints |
-|-------|----------------|-------|
-| Easy | 10 | 5 |
-| Medium | 20 | 4 |
-| Hard | 30 | 3 |
+### Scoring
+| Action | Points |
+|--------|--------|
+| Correct answer | 10 pts × streak multiplier |
+| Hint bonus | +100 pts per unused free hint at end of game |
+| Buying a hint | −5 pts |
 
-## Running locally
+### Lives & Timer
+- You have **3 lives** — each wrong answer costs one
+- Each level has a **3-minute timer** — running out ends the game
+- Pausing stops the timer and hides the clue
 
-```bash
-cd jumble-game
-npx vite
-```
+---
 
-Then open `http://localhost:5173` in your browser.
-
-## Project structure
+## Project Structure
 
 ```
 jumble-game/
-├── index.html       # Game UI
-├── main.js          # Game logic
-├── jumble-words.js  # Word bank (Easy / Medium / Hard)
-└── style.css        # Styles
+├── jumble-game/          ← Source code (edit these files)
+│   ├── index.html        ← Page layout and structure
+│   ├── main.js           ← All game logic
+│   ├── style.css         ← All visual styling
+│   ├── logo.svg          ← Tile-style logo (JMBLE + floating U)
+│   ├── jumble-words.js   ← Word list and categories by level
+│   └── vite.config.js    ← Build configuration
+├── dist/                 ← Built output (auto-generated, don't edit)
+└── README.md             ← This file
 ```
+
+---
+
+## How the Code Works
+
+### Game Logic (`main.js`)
+
+The entire game runs from a single **state object** that tracks everything:
+
+```js
+const state = {
+  levelKey: 'easy',        // current level: 'easy' | 'medium' | 'hard'
+  streak: 0,               // correct answers in a row (need 10 to advance)
+  score: 0,                // running score
+  hints: 5,                // free hints remaining
+  lives: 3,                // wrong guesses remaining
+  scrambled: [],           // letter tiles (each has a .used flag)
+  answer: [],              // slots the player is filling in
+  checked: false,          // whether current answer has been checked
+  hintUsed: false,         // whether a hint was used on this word
+  currentWord: null,       // the word object being played
+  timerSeconds: 180,       // countdown (3 min = 180 seconds)
+  timerInterval: null,     // reference to the timer so it can be stopped
+  paused: false,           // whether game is paused
+  pendingTimerReset: false // true when a new word needs a fresh timer start
+};
+```
+
+**Key functions:**
+- `loadWord()` — picks a random unused word for the current level and sets up tiles
+- `startTimer()` — begins the 3-minute countdown; turns red at 60 seconds
+- `stopTimer()` — pauses or stops the countdown
+- `checkAnswer()` — compares player's answer to the correct word, updates score and lives
+- `showOverlay(message)` — displays the start/pause screen over the game
+- `startGame()` — hides the overlay and starts the timer
+- `togglePause()` — pauses the timer and hides the clue
+- `showGameOver()` — shows the 💀 Game Over screen with score save form
+- `showTimerGameOver()` — shows the ⏱️ Time's Up screen with score save form
+- `restartGame()` — resets everything and starts fresh
+
+### Word List (`jumble-words.js`)
+
+Words are organized into three levels. Each word has:
+- The answer word
+- A category (shown as the clue)
+- Optional hint text
+
+### Styling (`style.css`)
+
+Uses **CSS custom properties** (variables) for theming, with automatic dark mode support:
+```css
+:root { --bg: #fff; --text: #111; ... }
+@media (prefers-color-scheme: dark) { :root { --bg: #1a1a1a; ... } }
+```
+
+The tile-inspired design gives buttons, stat chips, and letter tiles a consistent look with subtle borders, shadows, and a slight press animation when clicked.
+
+---
+
+## Leaderboard (Turso Database)
+
+Scores are saved to a **Turso** database — a free SQLite-based cloud database that never pauses for inactivity.
+
+**Dashboard:** [turso.tech](https://turso.tech)  
+**Database:** `jumble-game-heididean`  
+**Table:** `scores` with columns: `id`, `initials`, `score`, `date`, `created_at`
+
+To manually view or manage scores, log in at Turso and use the query shell:
+
+```sql
+-- View all scores
+SELECT * FROM scores ORDER BY score DESC;
+
+-- Add a score manually
+INSERT INTO scores (initials, score, date) VALUES ('HD', 500, 'Jul 22, 2026');
+
+-- Delete a score by ID
+DELETE FROM scores WHERE id = 1;
+```
+
+> **Note:** The previous database was Supabase (`ueaovkskozkglwlvrbwx.supabase.co`), which was retired because its free tier pauses after inactivity.
+
+---
+
+## Local Development
+
+To run the game on your computer:
+
+```bash
+cd jumble-game
+npx vite --port 5173
+```
+
+Then open [localhost:5173/jumble-game/](http://localhost:5173/jumble-game/) in your browser. Changes to the source files update live automatically.
+
+---
+
+## Deploying to GitHub Pages
+
+The live site is hosted on the `gh-pages` branch. To deploy after making changes:
+
+**1. Build the project** (from inside the `jumble-game/` subfolder):
+```bash
+cd jumble-game
+npx vite build
+```
+
+**2. Switch to gh-pages and copy the build:**
+```bash
+git checkout gh-pages
+cp dist/index.html .
+cp -r dist/assets .
+git show main:jumble-game/logo.svg > logo.svg
+```
+
+**3. Commit and push:**
+```bash
+git add index.html assets/ logo.svg
+git commit -m "Deploy: description of changes"
+git pull origin gh-pages --rebase
+git push origin gh-pages
+git checkout main
+```
+
+> **Note:** The logo (`logo.svg`) is not automatically included in the Vite build because it's referenced in HTML rather than imported in code — it must be manually copied each deployment.
+
+---
+
+## Feature History
+
+| Branch | Feature |
+|--------|---------|
+| `3_lives` | 3 lives system — 3 wrong guesses ends the game |
+| `timer` | 3-minute countdown per level — running out ends the game |
+| `start-and-pause` | Start overlay hides the first clue; Pause stops timer and hides clue |
+| `ui-enhancements` | Tile-inspired UI redesign + JMBLE logo |
+| `main` | Leaderboard migrated from Supabase → Turso |
