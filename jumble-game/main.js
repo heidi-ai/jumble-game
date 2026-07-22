@@ -67,7 +67,7 @@ async function fetchHighScores() {
     );
     return result.rows.map(row => ({
       initials: row[0].value,
-      score: row[1].value,
+      score: Number(row[1].value),
       date: row[2].value,
     }));
   } catch {
