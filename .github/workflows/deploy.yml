@@ -25,6 +25,8 @@ jobs:
         working-directory: jumble-game
       - run: npx vite build
         working-directory: jumble-game
+        env:
+          VITE_TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
       - uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist

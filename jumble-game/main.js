@@ -11,7 +11,7 @@ const LEVEL_TIME = 3 * 60; // 3 minutes in seconds
 // Supabase retired — now using Turso
 
 const TURSO_URL = 'https://jumble-game-heididean.aws-us-west-2.turso.io';
-const TURSO_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODQ3Mzg5MDQsImlkIjoiMDE5ZjhhYjctNTIwMS03NWVhLTgyZDItYTBkMjNjYWM5OTY1Iiwia2lkIjoid3BMUGNVRm1ORkRWRXVvZGRsS1ZiaXNBZnFSTzgxNzU2ZlBVSXZicmRTYyIsInJpZCI6IjM5MWViMTA1LWNhOWQtNGYxYS05MDhmLTIwODQ0MDg2ZmNlZSJ9.ONuoEgBBROVA0-1K3B2OdXOrUpmQ7BCLn-5c8FPibZqBKbCBnanjgswLhJD5ydUJ0m-7PDhMDvKJd_yndHifBg';
+const TURSO_TOKEN = import.meta.env.VITE_TURSO_TOKEN;
 
 const state = {
   levelKey: 'easy',
