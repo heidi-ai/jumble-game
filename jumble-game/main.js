@@ -8,8 +8,10 @@ const HINT_COST = 5;
 const HINT_BONUS = 100;
 const LEVEL_TIME = 3 * 60; // 3 minutes in seconds
 
-const SUPABASE_URL = 'https://ueaovkskozkglwlvrbwx.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_VEkT1kNKr2Ajuh7BOmZJ6w_1L8YWGaL';
+// Supabase retired — now using Turso
+
+const TURSO_URL = 'libsql://jumble-game-heididean.aws-us-west-2.turso.io';
+const TURSO_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODQ3Mzg5MDQsImlkIjoiMDE5ZjhhYjctNTIwMS03NWVhLTgyZDItYTBkMjNjYWM5OTY1Iiwia2lkIjoid3BMUGNVRm1ORkRWRXVvZGRsS1ZiaXNBZnFSTzgxNzU2ZlBVSXZicmRTYyIsInJpZCI6IjM5MWViMTA1LWNhOWQtNGYxYS05MDhmLTIwODQ0MDg2ZmNlZSJ9.ONuoEgBBROVA0-1K3B2OdXOrUpmQ7BCLn-5c8FPibZqBKbCBnanjgswLhJD5ydUJ0m-7PDhMDvKJd_yndHifBg';
 
 const state = {
   levelKey: 'easy',
@@ -40,20 +42,34 @@ function setUsed(levelKey, arr) {
 
 // ── High scores ──────────────────────────────────────────────────────────────
 
-const sbHeaders = {
-  'apikey': SUPABASE_KEY,
-  'Authorization': `Bearer ${SUPABASE_KEY}`,
+const tursoHeaders = {
+  'Authorization': `Bearer ${TURSO_TOKEN}`,
   'Content-Type': 'application/json',
 };
 
+async function tursoQuery(sql, args = []) {
+  const res = await fetch(`${TURSO_URL}/v2/pipeline`, {
+    method: 'POST',
+    headers: tursoHeaders,
+    body: JSON.stringify({
+      requests: [{ type: 'execute', stmt: { sql, args } }],
+    }),
+  });
+  if (!res.ok) throw new Error(`Turso error (${res.status})`);
+  const data = await res.json();
+  return data.results[0].response.result;
+}
+
 async function fetchHighScores() {
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/scores?select=initials,score,date&order=score.desc&limit=10`,
-      { headers: sbHeaders }
+    const result = await tursoQuery(
+      'SELECT initials, score, date FROM scores ORDER BY score DESC LIMIT 10'
     );
-    if (!res.ok) throw new Error(res.status);
-    return await res.json();
+    return result.rows.map(row => ({
+      initials: row[0].value,
+      score: row[1].value,
+      date: row[2].value,
+    }));
   } catch {
     return [];
   }
@@ -61,16 +77,14 @@ async function fetchHighScores() {
 
 async function insertHighScore(initials, score) {
   const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
-    method: 'POST',
-    headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
-    body: JSON.stringify({
-      initials: initials.toUpperCase().padEnd(3, ' ').slice(0, 3),
-      score,
-      date,
-    }),
-  });
-  if (!res.ok) throw new Error(`Save failed (${res.status})`);
+  await tursoQuery(
+    'INSERT INTO scores (initials, score, date) VALUES (?, ?, ?)',
+    [
+      { type: 'text', value: initials.toUpperCase().padEnd(3, ' ').slice(0, 3) },
+      { type: 'integer', value: String(score) },
+      { type: 'text', value: date },
+    ]
+  );
 }
 
 async function renderLeaderboard() {
