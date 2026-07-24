@@ -183,6 +183,7 @@ function startTimer() {
       $('btn-check').disabled = true;
       $('btn-hint').disabled = true;
       $('btn-buy-hint').disabled = true;
+      $('btn-skip').disabled = true;
       setTimeout(() => showTimerGameOver(), 1000);
     }
   }, 1000);
@@ -223,6 +224,7 @@ function startGame() {
         $('btn-check').disabled = true;
         $('btn-hint').disabled = true;
         $('btn-buy-hint').disabled = true;
+        $('btn-skip').disabled = true;
         setTimeout(() => showTimerGameOver(), 1000);
       }
     }, 1000);
@@ -260,6 +262,7 @@ function showTimerGameOver() {
   const input = $('initials-input');
   const saveBtn = $('btn-save-score');
   input.focus();
+  $('level-banner').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
   input.addEventListener('input', () => {
     input.value = input.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
@@ -437,6 +440,7 @@ function checkAnswer() {
         $('btn-check').disabled = true;
         $('btn-hint').disabled = true;
         $('btn-buy-hint').disabled = true;
+        $('btn-skip').disabled = true;
         setFeedback(`+${pts} pts`, 'success');
         setTimeout(() => showInitialsPrompt(state.score, hintBonus), 900);
       } else {
@@ -459,6 +463,7 @@ function checkAnswer() {
       $('btn-check').disabled = true;
       $('btn-hint').disabled = true;
       $('btn-buy-hint').disabled = true;
+      $('btn-skip').disabled = true;
       setTimeout(() => showGameOver(), 1000);
     } else {
       setFeedback(`Wrong! ${state.lives} ${state.lives === 1 ? 'life' : 'lives'} remaining`, 'danger');
@@ -490,6 +495,7 @@ function showGameOver() {
   const input = $('initials-input');
   const saveBtn = $('btn-save-score');
   input.focus();
+  $('level-banner').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
   input.addEventListener('input', () => {
     input.value = input.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
@@ -553,6 +559,7 @@ function showInitialsPrompt(finalScore, hintBonus) {
   const input = $('initials-input');
   const saveBtn = $('btn-save-score');
   input.focus();
+  $('level-banner').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
   input.addEventListener('input', () => {
     input.value = input.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
