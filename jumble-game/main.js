@@ -509,6 +509,8 @@ function showGameOver() {
 function advanceLevel(nextIdx) {
   state.levelKey = LEVEL_ORDER[nextIdx];
   state.streak = 0;
+  state.timerSeconds = LEVEL_TIME[state.levelKey];
+  renderTimer();
   renderLevelBadge();
   showBanner(`Level up! Welcome to ${getLevelData().label}`, false);
   setTimeout(() => loadWord(true), 2000);
