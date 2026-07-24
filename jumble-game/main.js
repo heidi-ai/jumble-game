@@ -298,7 +298,7 @@ function renderLives() {
 }
 
 function renderStreakPips() {
-  $('streak-pips').innerHTML = Array.from({ length: 10 }, (_, i) =>
+  $('streak-pips').innerHTML = Array.from({ length: 5 }, (_, i) =>
     `<div class="pip${i < state.streak ? ' done' : ''}"></div>`
   ).join('');
 }
@@ -412,7 +412,7 @@ function checkAnswer() {
     renderStreakPips();
 
     const nextIdx = LEVEL_ORDER.indexOf(state.levelKey) + 1;
-    if (state.streak >= 10) {
+    if (state.streak >= 5) {
       if (nextIdx >= LEVEL_ORDER.length) {
         const hintBonus = state.hints * HINT_BONUS;
         state.score += hintBonus;
