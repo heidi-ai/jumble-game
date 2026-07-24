@@ -331,3 +331,85 @@ button:disabled { opacity: 0.4; cursor: default; }
   margin-top: 1rem;
   opacity: 0.5;
 }
+
+/* Help button */
+.logo-wrap { position: relative; }
+.help-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-med);
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.help-btn:hover { background: var(--bg-tertiary); color: var(--text); }
+
+/* Help modal */
+.help-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.help-modal.visible { display: flex; }
+.help-content {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  padding: 1.5rem;
+  max-width: 480px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+}
+.help-content h2 { margin: 0 0 1rem; font-size: 20px; }
+.help-content h3 { margin: 1.25rem 0 0.4rem; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+.help-content p { margin: 0 0 0.5rem; font-size: 14px; line-height: 1.6; }
+.help-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-med);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.help-close:hover { background: var(--bg-secondary); }
+.help-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 0.5rem;
+}
+.help-table th, .help-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.help-table th { color: var(--text-muted); font-weight: 500; }
+.help-table tr:last-child td { border-bottom: none; }

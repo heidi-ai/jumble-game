@@ -628,6 +628,9 @@ $('btn-shuffle').onclick = shuffleTiles;
 $('btn-skip').onclick = skipWord;
 $('btn-start').onclick = startGame;
 $('btn-pause').onclick = togglePause;
+$('btn-help').onclick = () => $('help-modal').classList.add('visible');
+$('btn-close-help').onclick = () => $('help-modal').classList.remove('visible');
+$('help-modal').addEventListener('click', e => { if (e.target === $('help-modal')) $('help-modal').classList.remove('visible'); });
 
 renderLevelBadge();
 renderLeaderboard();
