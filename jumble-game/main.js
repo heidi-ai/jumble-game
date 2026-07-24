@@ -201,11 +201,13 @@ function showOverlay(message) {
   $('btn-start').textContent = '▶ Start';
   $('game-overlay').classList.add('visible');
   $('btn-pause').disabled = true;
+  $('btn-check').disabled = true;
 }
 
 function hideOverlay() {
   $('game-overlay').classList.remove('visible');
   $('btn-pause').disabled = false;
+  $('btn-check').disabled = false;
 }
 
 function startGame() {
