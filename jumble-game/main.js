@@ -6,7 +6,7 @@ const HINTS_START = 5;
 const LIVES_START = 3;
 const HINT_COST = 5;
 const HINT_BONUS = 100;
-const LEVEL_TIME = 3 * 60; // 3 minutes in seconds
+const LEVEL_TIME = { easy: 2 * 60, medium: 3 * 60, hard: 3 * 60 };
 
 // Supabase retired — now using Turso
 
@@ -24,7 +24,7 @@ const state = {
   checked: false,
   hintUsed: false,
   currentWord: null,
-  timerSeconds: LEVEL_TIME,
+  timerSeconds: LEVEL_TIME.easy,
   timerInterval: null,
   paused: false,
   pendingTimerReset: false,
@@ -169,7 +169,7 @@ function renderTimer() {
 
 function startTimer() {
   stopTimer();
-  state.timerSeconds = LEVEL_TIME;
+  state.timerSeconds = LEVEL_TIME[state.levelKey];
   renderTimer();
   state.timerInterval = setInterval(() => {
     state.timerSeconds--;
