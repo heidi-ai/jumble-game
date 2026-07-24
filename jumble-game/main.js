@@ -3,6 +3,7 @@ import { LEVELS, LEVEL_ORDER } from './jumble-words.js';
 const $ = id => document.getElementById(id);
 
 const HINTS_START = 5;
+const SKIPS_START = 2;
 const LIVES_START = 3;
 const HINT_COST = 5;
 const HINT_BONUS = 100;
@@ -18,6 +19,7 @@ const state = {
   streak: 0,
   score: 0,
   hints: HINTS_START,
+  skips: SKIPS_START,
   lives: LIVES_START,
   scrambled: [],
   answer: [],
@@ -144,6 +146,7 @@ function loadWord(resetTimer = false) {
   $('btn-pause').textContent = '⏸ Pause';
   renderStreakPips();
   renderLives();
+  renderSkips();
   renderTiles();
   updateHintButtons();
   if (resetTimer) {
@@ -334,6 +337,19 @@ function renderTiles() {
 function updateHintButtons() {
   $('btn-hint').disabled = state.hints <= 0 || state.checked || state.hintUsed;
   $('btn-buy-hint').disabled = state.hints > 0 || state.score < HINT_COST || state.checked || state.hintUsed;
+}
+
+function renderSkips() {
+  $('skips-left').textContent = `${state.skips} skip${state.skips !== 1 ? 's' : ''} left`;
+  $('btn-skip').disabled = state.skips <= 0 || state.paused;
+}
+
+function skipWord() {
+  if (state.skips <= 0 || state.paused) return;
+  state.skips--;
+  renderSkips();
+  setFeedback('Word skipped!', '');
+  setTimeout(() => loadWord(false), 800);
 }
 
 function shuffleTiles() {
@@ -581,7 +597,7 @@ function showBanner(msg) {
 }
 
 function restartGame() {
-  Object.assign(state, { levelKey: 'easy', streak: 0, score: 0, hints: HINTS_START, lives: LIVES_START, checked: false, paused: false, pendingTimerReset: false });
+  Object.assign(state, { levelKey: 'easy', streak: 0, score: 0, hints: HINTS_START, skips: SKIPS_START, lives: LIVES_START, checked: false, paused: false, pendingTimerReset: false });
   $('score').textContent = '0';
   $('hints-left').textContent = HINTS_START;
   renderLevelBadge();
@@ -601,6 +617,7 @@ $('btn-clear').onclick = clearAnswer;
 $('btn-hint').onclick = useHint;
 $('btn-buy-hint').onclick = buyHint;
 $('btn-shuffle').onclick = shuffleTiles;
+$('btn-skip').onclick = skipWord;
 $('btn-start').onclick = startGame;
 $('btn-pause').onclick = togglePause;
 

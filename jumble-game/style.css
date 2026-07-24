@@ -255,6 +255,19 @@ button.amber {
   border-color: var(--amber-border);
 }
 button.amber:hover { opacity: 0.85; }
+button.skip {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  border-color: var(--border-med);
+}
+button.skip:hover { background: var(--bg-tertiary); }
+.skips-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+}
 button:disabled { opacity: 0.4; cursor: default; }
 
 .leaderboard {
