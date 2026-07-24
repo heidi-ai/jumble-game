@@ -35,7 +35,7 @@ var e=(e,t)=>()=>(e&&(t=e(e=0)),t),t=(e,t)=>()=>(t||(e((t={exports:{}}).exports,
           💀 Game Over!<br><br>
           Final score: <strong>${d.score.toLocaleString()}</strong>
           <br><br><button class="primary" id="btn-restart">Play again</button>
-        </div>`,e(`btn-restart`).onclick=Y}catch{n.disabled=!1,n.textContent=`Save score`;let t=e(`save-error`);t&&(t.textContent=`Save failed — please try again.`)}}}}function G(e){d.levelKey=r[e],d.streak=0,w(),J(`Level up! Welcome to ${b().label}`,!1),setTimeout(()=>C(!0),2e3)}function K(t,n){e(`level-banner`).innerHTML=`
+        </div>`,e(`btn-restart`).onclick=Y}catch{n.disabled=!1,n.textContent=`Save score`;let t=e(`save-error`);t&&(t.textContent=`Save failed — please try again.`)}}}}function G(e){d.levelKey=r[e],d.streak=0,d.timerSeconds=c[d.levelKey],T(),w(),J(`Level up! Welcome to ${b().label}`,!1),setTimeout(()=>C(!0),2e3)}function K(t,n){e(`level-banner`).innerHTML=`
     <div class="level-up-banner">
       You completed all levels!<br><br>
       ${n>0?`<span style="font-size:14px;opacity:0.8">${d.hints} unused hint${d.hints===1?``:`s`} × ${s} pts = +${n} bonus</span><br><br>`:``}
