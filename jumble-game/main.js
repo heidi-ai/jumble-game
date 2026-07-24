@@ -440,6 +440,7 @@ function checkAnswer() {
         setFeedback(`+${pts} pts`, 'success');
         setTimeout(() => showInitialsPrompt(state.score, hintBonus), 900);
       } else {
+        stopTimer();
         setFeedback(`+${pts} pts`, 'success');
         setTimeout(() => advanceLevel(nextIdx), 900);
       }
