@@ -323,3 +323,11 @@ button:disabled { opacity: 0.4; cursor: default; }
   height: 90px;
   width: auto;
 }
+
+.version {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1rem;
+  opacity: 0.5;
+}
