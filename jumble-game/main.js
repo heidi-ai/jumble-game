@@ -7,7 +7,7 @@ const SKIPS_START = 2;
 const LIVES_START = 3;
 const HINT_COST = 5;
 const HINT_BONUS = 100;
-const LEVEL_TIME = { easy: 2 * 60, medium: 3 * 60, hard: 3 * 60 };
+const LEVEL_TIME = { easy: 2 * 60, medium: 3 * 60, hard: 4 * 60 };
 
 // Supabase retired — now using Turso
 
